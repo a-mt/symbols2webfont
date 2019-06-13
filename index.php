@@ -1,12 +1,14 @@
 <?php
 session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Donwload result
 if(isset($_GET['file']) && isset($_SESSION['file'])) {
     $txt = $_SESSION['file'];
 
     header("Content-type: image/svg+xml"); 
-    header("Content-Disposition: attachment; filename=SVGFont.svg");
+    header("Content-Disposition: attachment; filename=" . $_SESSION['filename']);
     header("Content-length: " . strlen($txt));
     header("Pragma: no-cache"); 
     header("Expires: 0"); 
@@ -29,7 +31,7 @@ if(isset($_FILES['svg'])) {
 
         // Check file
         $mime = mime_content_type($_FILES['svg']['tmp_name']);
-        if($mime != 'image/svg') {
+        if($mime != 'image/svg' && $mime != 'image/svg+xml') {
             redirect("You should upload a .svg file");
         }
 
@@ -41,6 +43,7 @@ if(isset($_FILES['svg'])) {
 
             if($output) {
                 $_SESSION["file"]     = $output;
+                $_SESSION['filename'] = 'SVGFont.svg';
                 $_SESSION["download"] = 1;
                 redirect(null, $err);
             } else {
@@ -74,12 +77,43 @@ if(isset($_FILES['svg'])) {
 
         if($output) {
             $_SESSION["file"]     = $output;
+            $_SESSION['filename'] = 'SVGFont.svg';
             $_SESSION["download"] = 1;
             redirect(null, $err);
         } else {
             redirect($err);
         }
     }
+
+// Webfont to symbol
+} else if(isset($_FILES['svgwebfont']) && $_FILES['svgwebfont']['name']) {
+    $err = "";
+
+    // Check upload
+    $err = getErrorMsg($_FILES['svgwebfont']['error']);
+    if($err) {
+        redirect($err);
+    }
+
+    // Check file
+    $mime = mime_content_type($_FILES['svgwebfont']['tmp_name']);
+    if($mime != 'image/svg' && $mime != 'image/svg+xml') {
+        redirect("You should upload a .svg file");
+    }
+
+    $txt = file_get_contents($_FILES['svgwebfont']['tmp_name']);
+    if($txt) {
+        list($err, $output) = convertWebfont($txt);
+
+        if($output) {
+            $_SESSION["file"]     = $output;
+            $_SESSION['filename'] = 'SVGSymbols.html';
+            $_SESSION["download"] = 1;
+            redirect(null, $err);
+        }
+
+    }
+    redirect($err);
 }
 
 function getErrorMsg($errorCode) {
@@ -98,6 +132,64 @@ function redirect($err = null, $warning = null) {
     $_SESSION["warning"] = $warning;
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
+}
+
+// Convert SVG Webfont to SVG symbos
+function convertWebfont($txt) {
+    libxml_use_internal_errors(true);
+
+    require __DIR__ . '/SVG-Icon-Font-Generator/Document.php';
+    require __DIR__ . '/SVG-Icon-Font-Generator/Font.php';
+    require __DIR__ . '/SVG-Icon-Font-Generator/IconFontGenerator.php';
+
+    $font = new Font([], $txt);
+    $fontOptions = $font->getOptions();
+    $scale = 512/$fontOptions['units-per-em'];
+
+    $symbols = '';
+    $preview = '';
+    $c = 0;
+
+    foreach($font->getGlyphs() as $glyph) {
+        if(!$glyph['path'] || !$glyph['name']) continue;
+
+        $glyphDocument = Document::createFromPath($glyph['path'], $fontOptions['horiz-adv-x'], $fontOptions['units-per-em']);
+
+        $name     = $glyph['name'];
+        $width    = empty($glyph['width']) ? 512 : ($glyph['width']*$scale);
+        $path     = $glyphDocument->getPath($scale, null, 'vertical', true, 0, -64*$scale);
+
+        $symbols .= "<symbol id=\"$name\" viewBox=\"0 0 $width 512\"><path d=\"$path\"/></symbol>\n";
+        $preview .= "<svg class=\"icon icon-$name\"><use xlink:href=\"#$name\"></use></svg>\n";
+        $c++;
+    }
+    if(!$c) {
+        return ["No glyphs", null];
+    }
+
+	$html = <<<HEREDOC
+<!DOCTYPE html><html>
+  <head>
+    <meta charset="UTF-8">
+    <title>SVG Webfont</title>
+    <style>
+      .icon {
+          width: 32px;
+          height: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" id="webfont">
+      $symbols
+    </svg>
+    $preview
+  </body>
+</html>
+HEREDOC;
+
+    // Return created HTML
+    return [null, $html];
 }
 
 // Convert SVG symbols to SVG Webfont

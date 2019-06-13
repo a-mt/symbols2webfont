@@ -166,6 +166,45 @@
       </div>
     </form>
 
+    <br>
+    <form method="POST" enctype="multipart/form-data">
+      <h1>SVG Webfont to SVG Symbols</h1>
+
+      <fieldset>
+        <h2>SVG Webfont
+          <button type="button" class="info" onclick="toggleAbout()">&#9432;</button>
+        </h2>
+        <div class="about" hidden>
+          Upload a SVG Webfont:
+          <pre>&lt;?xml version=&quot;1.0&quot; standalone=&quot;no&quot;?&gt;
+  &lt;!DOCTYPE svg PUBLIC &quot;-//W3C//DTD SVG 1.1//EN&quot; &quot;http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd&quot;&gt;
+  &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;
+     &lt;defs&gt;
+        &lt;font id=&quot;SVGFont&quot; horiz-adv-x=&quot;512&quot;&gt;
+           &lt;font-face units-per-em=&quot;512&quot; ascent=&quot;448&quot; descent=&quot;-64&quot; x-height=&quot;240&quot; cap-height=&quot;480&quot;/&gt;
+           &lt;missing-glyph horiz-adv-x=&quot;512&quot;/&gt;
+           &lt;glyph unicode=&quot;57345&quot; glyph-name=&quot;myicon&quot; horiz-adv-x=&quot;341&quot; d=&quot;M255.232 448c-2.56 -0.42667 -4.77867 -2.56 -5.248 -3.15733 -0.29867 -0.29867 -0.85333 -0.59733 -0.93867 -0.85333L1.70667 165.84533c-1.06667 -1.152 -1.70667 -2.688 -1.70667 -4.48 0 -3.54133 2.688 -6.31467 6.144 -6.31467h125.86667l-52.48 -210.176v-1.408c-0.08533 -0.42667 -0.42667 -0.85333 -0.42667 -1.28 0 -3.584 2.688 -6.4 6.144 -6.4 1.92 0 3.62667 0.85333 4.77867 2.304l249.51467 292.43733c1.152 1.19467 1.70667 2.73067 1.70667 4.48 0 3.49867 -2.56 6.272 -6.05867 6.272H200.10667L260.48 438.48533c0.42667 0.85333 0.42667 1.70667 0.42667 2.73067 0 3.62667 -0.17067 5.12 -2.98667 6.4C256.98133 447.82933 256 448 255.14667 448&quot;/&gt;
+        &lt;/font&gt;
+     &lt;/defs&gt;
+  &lt;/svg&gt;</pre>
+          Retrieve a SVG File of Symbols:
+          <pre>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;
+       style=&quot;position: absolute; width: 0; height: 0&quot; id=&quot;__SVG_SPRITE_NODE__&quot;&gt;
+  &lt;symbol viewBox=&quot;0 0 8 12&quot; id=&quot;myicon&quot;&gt;
+    &lt;path fill-rule=&quot;evenodd&quot; d=&quot;M5.982 0c-.06.01-.112.06-.123.074-.007.007-.02.014-.022.02L.04 6.613c-.025.027-.04.063-.04.105 0 .083.063.148.144.148h2.95l-1.23 4.926v.033c-.002.01-.01.02-.01.03 0 .084.063.15.144.15.045 0 .085-.02.112-.054l5.848-6.854c.027-.028.04-.064.04-.105 0-.082-.06-.147-.142-.147H4.69L6.105.223c.01-.02.01-.04.01-.064 0-.085-.004-.12-.07-.15C6.023.004 6 0 5.98 0&quot;&gt;&lt;/path&gt;
+  &lt;/symbol&gt;&lt;/svg&gt;</pre>
+        </div>
+        <div class="file">
+          <label for="svgwebfont">SVG Webfont</label>
+          <input id="svgwebfont" name="svgwebfont" type="file">
+        </div>
+      </fieldset>
+
+      <div class="actions">
+          <input type="submit" class="btn">
+      </div>
+    </form>
+
     <script>
         (function(){
             var infoElements = document.getElementsByClassName("info");
